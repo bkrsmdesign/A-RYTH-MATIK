@@ -320,22 +320,20 @@ void loop() {
   }
 
   if (gate_timer + 10 <= millis()) {  //off all gate , gate time is 10msec
-
-    FastGPIO::Pin<5>::setOutput(0);
-    FastGPIO::Pin<6>::setOutput(0);
-    FastGPIO::Pin<7>::setOutput(0);
-    FastGPIO::Pin<8>::setOutput(0);
-    FastGPIO::Pin<9>::setOutput(0);
-    FastGPIO::Pin<10>::setOutput(0);
+    OUTPUT1::setOutput(0);
+    OUTPUT2::setOutput(0);
+    OUTPUT3::setOutput(0);
+    OUTPUT4::setOutput(0);
+    OUTPUT5::setOutput(0);
+    OUTPUT6::setOutput(0);
   }
   if (gate_timer + 30 <= millis()) {  //off all gate , gate time is 10msec, reduced from 100 ms to 30 ms
-    FastGPIO::Pin<4>::setOutput(0);   // CLK LED
-    FastGPIO::Pin<14>::setOutput(0);
-    FastGPIO::Pin<15>::setOutput(0);
-    FastGPIO::Pin<16>::setOutput(0);
-    FastGPIO::Pin<17>::setOutput(0);
-    FastGPIO::Pin<0>::setOutput(0);
-    FastGPIO::Pin<1>::setOutput(0);
+    LED1::setOutput(0);
+    LED2::setOutput(0);
+    LED3::setOutput(0);
+    LED4::setOutput(0);
+    LED5::setOutput(0);
+    LED6::setOutput(0);
   }
 
   if (old_trg_in == 0 && trg_in == 0 && gate_timer + 3000 <= millis()) {
@@ -399,39 +397,36 @@ void initDisplay() {
 }
 
 void onEncoderClicked(EncoderButton &eb) {
-
+    // I'm not sure why we need to check button state here since this is inside a button click handler?
     if (encoder.buttonState()) {  // button pressed without debounce (handled by library)
         disp_refresh = debug;
+    }
+
+    // Channel-specific actions
+    if (selected_menu <= MENU_CH_6) {
+        // Click should only advance selected setting when a channel top menu is selected.
         selected_setting = static_cast<Setting>((selected_setting + 1) % SETTING_LAST);
+        return;
     }
 
-    if (selected_setting > 7) selected_setting = SETTING_TOP_MENU;  // Wraps around the channel individual settings menus
-
-    if (selected_menu > MENU_CH_6 && selected_setting > SETTING_HITS) selected_setting = SETTING_TOP_MENU;  // Wrap around the other menu items
     // Mode-specific actions
-    if (selected_menu == MENU_SAVE && selected_setting == SETTING_HITS) {
+    if (selected_menu == MENU_SAVE) {
         saveConfiguration();
-        selected_setting = SETTING_TOP_MENU;
     }
-    if (selected_menu == MENU_LOAD && selected_setting == SETTING_HITS) {
+    if (selected_menu == MENU_LOAD) {
         loadConfiguration();
-        selected_setting = SETTING_TOP_MENU;
     }
-    if (selected_menu == MENU_ALL_RESET && selected_setting == SETTING_HITS) {
+    if (selected_menu == MENU_ALL_RESET) {
         resetSeq();
-        selected_setting = SETTING_TOP_MENU;
     }
-    if (selected_menu == MENU_ALL_MUTE && selected_setting == SETTING_HITS) {
+    if (selected_menu == MENU_ALL_MUTE) {
         toggleAllMutes();
-        selected_setting = SETTING_TOP_MENU;
     }
-    if (selected_menu == MENU_TEMP && selected_setting == SETTING_HITS) {  // modes only having a button
-
+    if (selected_menu == MENU_TEMP) {  // modes only having a button
         // Dial in tempo with the encoder and / or TapTempo via encoder button
         //adjustTempo();
-        selected_setting = SETTING_TOP_MENU;
     }
-    if (selected_menu == MENU_RAND && selected_setting == SETTING_HITS) {  //
+    if (selected_menu == MENU_RAND) {  //
         // This needs to work as before where you advance through the random array by rotating the encoder.
         // should make it possible to go back and forth like 5 steps and have a set of steady values
         Random_change();
